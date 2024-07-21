@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_polos">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="130dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="240dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/logo_1" />
+
+    <ImageView
+        android:id="@+id/nama_mitra"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="35dp"
+        app:layout_constraintStart_toEndOf="@+id/logo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/nama" />
+
+    <TextView
+        android:id="@+id/alamat_mitra"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="80dp"
+        android:text="Jl.Kelud No.12 Tawang, Wates, Kab,Kediri"
+        android:textColor="#070707"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/logo"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/gambar1"
+        android:layout_width="110dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logo"
+        app:srcCompat="@drawable/gambar_1" />
+
+    <ImageView
+        android:id="@+id/gambar2"
+        android:layout_width="110dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="14dp"
+        app:layout_constraintBottom_toBottomOf="@+id/gambar1"
+        app:layout_constraintStart_toEndOf="@+id/gambar1"
+        app:srcCompat="@drawable/gambar_3" />
+
+    <ImageView
+        android:id="@+id/gambar3"
+        android:layout_width="110dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/gambar2"
+        app:layout_constraintEnd_toEndOf="@+id/nama_mitra"
+        app:layout_constraintStart_toEndOf="@+id/gambar2"
+        app:srcCompat="@drawable/gambar_2" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Selamat Datang"
+        android:textColor="#020202"
+        android:textColorHint="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/gambar3"
+        app:layout_constraintStart_toStartOf="@+id/gambar1"
+        app:layout_constraintTop_toBottomOf="@+id/gambar2" />
+
+    <TextView
+        android:id="@+id/deskripsi"
+        android:layout_width="340dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="5dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Lembaga bimbingan belajar Ang Lesson merupakan lembaga bimbingan yang berdiri sejak tahun 2020. Selama 4 tahun beridiri, Lembaga Bimbingan Ang Lesson telah menjadi mitra terpercaya bagi orang tua dalam meningkatkan pendidikan akademis anak-anak."
+        android:textAlignment="center"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="@+id/gambar3"
+        app:layout_constraintStart_toStartOf="@+id/gambar1"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <ImageButton
+        android:id="@+id/btn_layanan"
+        android:layout_width="155dp"
+        android:layout_height="130dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tbn_jadwal"
+        app:layout_constraintEnd_toStartOf="@+id/tbn_jadwal"
+        app:srcCompat="@drawable/layanan" />
+
+    <ImageButton
+        android:id="@+id/tbn_jadwal"
+        android:layout_width="155dp"
+        android:layout_height="130dp"
+        android:layout_marginStart="210dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/deskripsi"
+        app:srcCompat="@drawable/jadwal" />
+
+    <Button
+        android:id="@+id/btn_loc"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:backgroundTint="#FE8700"
+        android:text="Lihat Lokasi Kami"
+        android:textColor="#fff"
+        app:layout_constraintEnd_toEndOf="@+id/deskripsi"
+        app:layout_constraintStart_toStartOf="@+id/deskripsi"
+        app:layout_constraintTop_toBottomOf="@+id/deskripsi" />
+
+    <Button
+        android:id="@+id/btn_contact"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FA8212"
+        android:text="KONTAK KAMI"
+        app:layout_constraintEnd_toEndOf="@+id/btn_loc"
+        app:layout_constraintStart_toStartOf="@+id/btn_loc"
+        app:layout_constraintTop_toBottomOf="@+id/btn_loc" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        app:itemBackground="@android:color/holo_orange_dark"
+        app:itemIconTint="@color/white"
+        app:itemTextColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/menu_bottom_nav">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

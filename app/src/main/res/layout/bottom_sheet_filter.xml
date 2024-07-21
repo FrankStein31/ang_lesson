@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Spinner for Month Selection -->
+    <Spinner
+        android:id="@+id/spinner_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/date_array"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Spinner for Year Selection -->
+    <Spinner
+        android:id="@+id/spinner_month"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/months_array"
+        android:layout_marginTop="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinner_year"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/years_array"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Apply Button -->
+    <Button
+        android:id="@+id/btn_apply_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apply Filter"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
