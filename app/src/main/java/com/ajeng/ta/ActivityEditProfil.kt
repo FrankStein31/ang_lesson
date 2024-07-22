@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ajeng.ta.databinding.ActivityEditProfilBinding
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONArray
 import org.json.JSONObject
@@ -20,43 +19,45 @@ class ActivityEditProfil : AppCompatActivity() {
         getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
     }
     private val client = OkHttpClient()
+    private var currentPassword: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityEditProfilBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        // Dapatkan data yang tersimpan di SharedPreferences
+        loadProfileData()
+
+        b.btnSimpan.setOnClickListener {
+            saveChanges()
+        }
+
+        supportActionBar?.hide()
+    }
+
+    private fun loadProfileData() {
         val responseBody = sharedPreferences.getString("responseBody", null)
         if (responseBody != null) {
             try {
                 val jsonResponse = JSONObject(responseBody)
                 if (jsonResponse.has("data")) {
                     val data = jsonResponse.getJSONObject("data")
-                    val username = data.getString("username")
-                    val alamat = data.getString("alamat")
-                    val telepon = data.getString("telepon")
-                    val email = data.getString("email")
-
-                    b.txUsername.setText(username)
-                    b.txAlamat.setText(alamat)
-                    b.txTelepon.setText(telepon)
-                    b.txEmail.setText(email)
+                    b.txUsername.setText(data.getString("username"))
+                    b.txAlamat.setText(data.getString("alamat"))
+                    b.txTelepon.setText(data.getString("telepon"))
+                    b.txEmail.setText(data.getString("email"))
+                    currentPassword = data.getString("password")
                 } else {
-                    Log.e("Activity Edit", "Key 'data' not found in JSON")
+                    Log.e("ActivityEditProfil", "Key 'data' not found in JSON")
                     Toast.makeText(this, "Data user tidak ditemukan", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Log.e("Activity Edit", "Error parsing JSON", e)
+                Log.e("ActivityEditProfil", "Error parsing JSON", e)
                 Toast.makeText(this, "Error parsing data", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Log.e("Activity Edit", "responseBody is null")
+            Log.e("ActivityEditProfil", "responseBody is null")
             Toast.makeText(this, "Data profil tidak ditemukan", Toast.LENGTH_SHORT).show()
-        }
-
-        b.btnSimpan.setOnClickListener {
-            saveChanges()
         }
     }
 
@@ -66,7 +67,6 @@ class ActivityEditProfil : AppCompatActivity() {
         val updatedTelepon = b.txTelepon.text.toString().trim()
         val updatedEmail = b.txEmail.text.toString().trim()
 
-        // Input validation
         if (updatedUsername.isEmpty() || updatedAlamat.isEmpty() || updatedTelepon.isEmpty() || updatedEmail.isEmpty()) {
             Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
             return
@@ -74,108 +74,107 @@ class ActivityEditProfil : AppCompatActivity() {
 
         val responseBody = sharedPreferences.getString("responseBody", null)
         var ID: String? = null
+        var idAkses: String? = null
         if (responseBody != null) {
             val jsonResponse = JSONObject(responseBody)
             if (jsonResponse.has("data")) {
                 val data = jsonResponse.getJSONObject("data")
                 ID = data.optString("ID")
+                idAkses = data.optString("id_akses")
             }
         }
 
-        if (ID != null) {
-            val urlBuilder = "http://192.168.0.56:8081/TA_1/api/Manage_all/edit_profil".toHttpUrlOrNull()?.newBuilder()
+        if (ID != null && idAkses != null) {
+            val requestBody = FormBody.Builder()
+                .add("ID", ID)
+                .add("id_akses", idAkses)
+                .add("username", updatedUsername)
+                .add("alamat", updatedAlamat)
+                .add("telepon", updatedTelepon)
+                .add("email", updatedEmail)
+                .add("password", currentPassword ?: "") // Add this line to include the current password
+                .build()
 
-            if (urlBuilder != null) {
-                val url = urlBuilder
-                    .addQueryParameter("ID", ID)
-                    .addQueryParameter("username", updatedUsername)
-                    .addQueryParameter("alamat", updatedAlamat)
-                    .addQueryParameter("telepon", updatedTelepon)
-                    .addQueryParameter("email", updatedEmail)
-                    .build()
+            val request = Request.Builder()
+                .url("http://192.168.0.56:8081/TA_1/api/Manage_all/edit_profil")
+                .post(requestBody)
+                .build()
 
-                val request = Request.Builder()
-                    .url(url)
-                    .get()
-                    .build()
+            Log.d("ActivityEditProfil", "Sending update request: ID=$ID, id_akses=$idAkses, username=$updatedUsername, alamat=$updatedAlamat, telepon=$updatedTelepon, email=$updatedEmail, password=$currentPassword")
 
-                client.newCall(request).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.e("ActivityEditProfil", "Gagal memperbarui profil", e)
-                        runOnUiThread {
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("ActivityEditProfil", "Gagal memperbarui profil", e)
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ActivityEditProfil,
+                            "Gagal memperbarui profil: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body?.string()
+                    Log.d("ActivityEditProfil", "Response: $responseBody")
+
+                    runOnUiThread {
+                        try {
+                            if (responseBody == null) {
+                                throw Exception("Response body is null")
+                            }
+
+                            Log.d("ActivityEditProfil", "Response body: $responseBody")
+
+                            if (responseBody.startsWith("<html>") || responseBody.startsWith("<div")) {
+                                throw Exception("Server returned HTML instead of JSON")
+                            }
+
+                            val jsonObject = JSONObject(responseBody)
+
+                            if (response.isSuccessful) {
+                                if (jsonObject.has("success") && jsonObject.getBoolean("success")) {
+                                    val updatedUserData = JSONObject().apply {
+                                        put("ID", ID)
+                                        put("id_akses", idAkses)
+                                        put("username", updatedUsername)
+                                        put("alamat", updatedAlamat)
+                                        put("telepon", updatedTelepon)
+                                        put("email", updatedEmail)
+                                        put("password", currentPassword)
+                                    }
+                                    val updatedResponseBody = JSONObject().put("data", updatedUserData).toString()
+                                    sharedPreferences.edit().putString("responseBody", updatedResponseBody).apply()
+
+                                    Toast.makeText(
+                                        this@ActivityEditProfil,
+                                        "Profil berhasil diperbarui",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    finish()
+                                } else {
+                                    val message = jsonObject.optString("message", "Gagal memperbarui profil")
+                                    throw Exception(message)
+                                }
+                            } else {
+                                val errorBody = response.body?.string()
+                                Log.e("ActivityEditProfil", "Error response: $errorBody")
+                                throw Exception("Server returned error: ${response.code}")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("ActivityEditProfil", "Error processing response", e)
                             Toast.makeText(
                                 this@ActivityEditProfil,
-                                "Gagal memperbarui profil: ${e.message}",
-                                Toast.LENGTH_SHORT
+                                "Gagal memproses respons dari server: ${e.message}",
+                                Toast.LENGTH_LONG
                             ).show()
                         }
                     }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        val responseBody = response.body?.string()
-                        Log.d("ActivityEditProfil", "Response: $responseBody")
-
-                        runOnUiThread {
-                            if (response.isSuccessful) {
-                                try {
-                                    val jsonArray = JSONArray(responseBody)
-                                    var updatedUser: JSONObject? = null
-
-                                    // Find the updated user in the array
-                                    for (i in 0 until jsonArray.length()) {
-                                        val user = jsonArray.getJSONObject(i)
-                                        if (user.getString("ID") == ID) {
-                                            updatedUser = user
-                                            break
-                                        }
-                                    }
-
-                                    if (updatedUser != null) {
-                                        // Update SharedPreferences with new data
-                                        with(sharedPreferences.edit()) {
-                                            putString("responseBody", JSONObject().put("data", updatedUser).toString())
-                                            apply()
-                                        }
-
-                                        Toast.makeText(
-                                            this@ActivityEditProfil,
-                                            "Profil berhasil diperbarui",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        finish()
-                                    } else {
-                                        Toast.makeText(
-                                            this@ActivityEditProfil,
-                                            "Gagal menemukan data pengguna yang diperbarui",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("ActivityEditProfil", "Error parsing response", e)
-                                    Toast.makeText(
-                                        this@ActivityEditProfil,
-                                        "Gagal memproses respons dari server",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            } else {
-                                Toast.makeText(
-                                    this@ActivityEditProfil,
-                                    "Gagal memperbarui profil: ${response.code}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }
-                })
-            } else {
-                Log.e("ActivityEditProfil", "Invalid URL")
-                Toast.makeText(this, "Invalid URL", Toast.LENGTH_SHORT).show()
-            }
+                }
+            })
         } else {
             Log.e("ActivityEditProfil", "Gagal mengambil ID pengguna dari SharedPreferences")
             Toast.makeText(this, "Gagal mengambil ID pengguna", Toast.LENGTH_SHORT).show()
         }
     }
-
 }

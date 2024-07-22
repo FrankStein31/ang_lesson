@@ -25,12 +25,15 @@ class FragmentProfil : Fragment() {
         requireActivity().getSharedPreferences("login_prefs", AppCompatActivity.MODE_PRIVATE)
     }
 
+    companion object {
+        private const val EDIT_PROFILE_REQUEST = 1
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
         txUsername = view.findViewById(R.id.txUsername)
@@ -40,48 +43,16 @@ class FragmentProfil : Fragment() {
         btnEdit = view.findViewById(R.id.btnEdit)
         btnLogout = view.findViewById(R.id.btnLogout)
 
-        val responseBody = arguments?.getString("responseBody") ?: sharedPreferences.getString("responseBody", null)
-        if (responseBody != null) {
-            try {
-                val jsonResponse = JSONObject(responseBody)
-                val data = jsonResponse.getJSONObject("data")
-                val username = data.getString("username")
-                val alamat = data.getString("alamat")
-                val telepon = data.getString("telepon")
-                val email = data.getString("email")
-
-                txUsername.text = username
-                txAlamat.text = alamat
-                txTelepon.text = telepon
-                txEmail.text = email
-
-                Log.e("item profile", "Data: $jsonResponse")
-            } catch (e: Exception) {
-                Log.e("item profile", "Error parsing JSON", e)
-                Toast.makeText(context, "Error parsing data", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Log.e("item profile", "responseBody is null")
-            Toast.makeText(context, "Data login tidak ditemukan", Toast.LENGTH_SHORT).show()
-        }
+        loadProfileData()
 
         btnEdit.setOnClickListener {
-            var responseBody = requireActivity().intent.getStringExtra("responseBody")
-            if (responseBody == null) {
-                responseBody = sharedPreferences.getString("responseBody", null)
-            }
-
+            val responseBody = sharedPreferences.getString("responseBody", null)
             if (responseBody != null) {
-                val jsonResponse = JSONObject(responseBody)
-                Log.e("item profile", "Data : $jsonResponse")
-
-                // Intent untuk mengirim responseBody ke ActivityEditProfil
                 val intent = Intent(requireActivity(), ActivityEditProfil::class.java)
                 intent.putExtra("responseBody", responseBody)
-                startActivity(intent)
+                startActivityForResult(intent, EDIT_PROFILE_REQUEST)
             } else {
                 Log.e("item profile", "responseBody is null")
-                // Tindakan jika responseBody null, misalnya tampilkan pesan kesalahan
                 Toast.makeText(requireActivity(), "Data login tidak ditemukan", Toast.LENGTH_SHORT).show()
             }
         }
@@ -91,6 +62,40 @@ class FragmentProfil : Fragment() {
         }
 
         return view
+    }
+
+    private fun loadProfileData() {
+        val responseBody = sharedPreferences.getString("responseBody", null)
+        if (responseBody != null) {
+            try {
+                val jsonResponse = JSONObject(responseBody)
+                val data = jsonResponse.getJSONObject("data")
+                txUsername.text = data.getString("username")
+                txAlamat.text = data.getString("alamat")
+                txTelepon.text = data.getString("telepon")
+                txEmail.text = data.getString("email")
+
+                Log.d("item profile", "Data loaded: $jsonResponse")
+            } catch (e: Exception) {
+                Log.e("item profile", "Error parsing JSON", e)
+                Toast.makeText(context, "Error parsing data", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Log.e("item profile", "responseBody is null")
+            Toast.makeText(context, "Data login tidak ditemukan", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProfileData()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == EDIT_PROFILE_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
+            loadProfileData()
+        }
     }
 
     private fun logout() {
